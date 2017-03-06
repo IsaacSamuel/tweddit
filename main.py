@@ -8,10 +8,26 @@ import re
 #Parses reddit comment to check if it references a twitter handle
 def references_twitter_handle(comment):
 	if comment.body is not None:
+		#Uses regular expressions to search for a twitter handle
 		return re.findall("(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9_]+)", comment.body)
 
 	else:
 		return []
+
+def twitter_reply(handle, permalink, comment_text):
+	retval = 'Hey @' + handle  + ', you may have been mentioned on reddit. "'
+
+	count = 0;
+	while len(retval) < 135:
+		retval += comment_text[count]
+		count += 1
+
+
+	retval += '..." '
+	retval += permalink
+	return retval
+
+
 
 
 def run():
@@ -28,7 +44,7 @@ def run():
 	#This sets up the twitter api
 	tweepy_auth = tweepy.OAuthHandler(tweepy_consumer_key, tweepy_consumer_secret)
 	tweepy_auth.set_access_token(tweepy_access_key, tweepy_access_secret)
-	api = tweepy.API(tweepy_auth)
+	twitter_api = tweepy.API(tweepy_auth)
 
 	#This sets up the reddit api
 	reddit = praw.Reddit('tweddit')
@@ -43,7 +59,19 @@ def run():
 				print(twitter_handle)
 
 				print comment.body
-				#create twitter reply
+
+				try :
+					user = twitter_api.get_user(twitter_handle[0])
+
+					reply = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
+
+					twitter_api.update_status(reply)
+
+					with open("test.txt", "a+") as file:
+						file.write(reply)
+						
+				except:
+					print("User not found.")
 
 				#link to twitter reply on reddit
 
@@ -52,8 +80,6 @@ def run():
 
 	#post any responses to twitter comments
 
-	time.sleep(20)
-	run()
 
 
 already_done = set()
