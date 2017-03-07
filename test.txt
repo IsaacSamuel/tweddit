@@ -33,3 +33,6 @@ Hey, I noticed you mentioned the valid twitter URL Tweddit Bot. I went ahead and
 Hey @pause, you may have been mentioned on reddit.reddit.com/r/learnpython/comments/5xxij1/running_a_python_program_in_windows/delq82p
 Hey, I noticed you mentioned the valid twitter handle pause. I went ahead and sent them a tweet that will link them to this post. If they reply to that tweet, I'll be sure to link it here. https://twitter.com/tweddit_bot/status/838950494668222466
 
+Hey @PeteBlackburn, you may have been mentioned on reddit. reddit.com/r/hockey/comments/5xy0a5/ref_in_the_ottbos_game_called_such_an_egregious/delqitm
+Hey, I noticed you mentioned the valid twitter handle PeteBlackburn. I went ahead and sent them a tweet that will link them to this post. If they reply to that tweet, I'll be sure to link it here. https://twitter.com/tweddit_bot/status/838952187690635264
+

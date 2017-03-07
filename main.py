@@ -7,12 +7,13 @@ import re
 
 #Parses reddit comment to check if it references a twitter handle
 def references_twitter_handle(comment):
-	if comment.body is not None:
-		#Uses regular expressions to search for a twitter handle
-		return re.findall("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", comment.body)
 
-	else:
-		return []
+	if comment.body is not None:
+		if "twitter" or "Twitter" or "Tweddit" or "tweddit" in comment.body:
+			#Uses regular expressions to search for a twitter handle
+			return re.findall("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", comment.body)
+
+	return []
 
 def twitter_reply(handle, permalink, comment_text):
 	retval = 'Hey @' + handle  + ', you may have been mentioned on reddit. '
