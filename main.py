@@ -9,22 +9,28 @@ import re
 def references_twitter_handle(comment):
 	if comment.body is not None:
 		#Uses regular expressions to search for a twitter handle
-		return re.findall("(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9_]+)", comment.body)
+		return re.findall("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", comment.body)
 
 	else:
 		return []
 
 def twitter_reply(handle, permalink, comment_text):
-	retval = 'Hey @' + handle  + ', you may have been mentioned on reddit. "'
+	retval = 'Hey @' + handle  + ', you may have been mentioned on reddit. '
 
 	count = 0;
-	while len(retval) < 135:
-		retval += comment_text[count]
-		count += 1
+	if len(retval) + len(permalink) < 120:
+		retval += '"'
+		while len(retval) + permalink < 135:
+			retval += comment_text[count]
+			count += 1
 
+		retval += '..." '
 
-	retval += '..." '
 	retval += permalink
+	return retval
+
+def reddit_reply(twitter_handle, tweet_url):
+	retval = "Hey, I noticed you mentioned the valid twitter handle " + twitter_handle + ". I went ahead and sent them a tweet that will link them to this post. If they reply to that tweet, I'll be sure to link it here. https://twitter.com/tweddit_bot/status/" + tweet_url
 	return retval
 
 
@@ -63,15 +69,24 @@ def run():
 				try :
 					user = twitter_api.get_user(twitter_handle[0])
 
-					reply = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
+					tweet = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
 
-					twitter_api.update_status(reply)
+					#Tweets out reddit link, returns object of that status
+					status_object = twitter_api.update_status(tweet)
+					tweet_id = status_object.id
+
+
+
+					reply = reddit_reply(twitter_handle[0], str(tweet_id))
 
 					with open("test.txt", "a+") as file:
-						file.write(reply)
+						file.write(tweet + "\n")
+						file.write(reply + "\n\n")
+
+
 						
 				except:
-					print("User not found.")
+					print("User not found.\n")
 
 				#link to twitter reply on reddit
 
