@@ -31,7 +31,7 @@ def twitter_reply(handle, permalink, comment_text):
 	return retval
 
 def reddit_reply(twitter_handle, tweet_url):
-	retval = "Hey, I noticed you mentioned the valid twitter handle " + twitter_handle + ". I went ahead and sent them a tweet that will link them to this post. https://twitter.com/tweddit_bot/status/" + tweet_url
+	retval = "Hey, I noticed you mentioned the valid twitter handle @" + twitter_handle + ". I went ahead and sent them a tweet that will link them to this post. If I am making this post in error, please reply 'delete'. https://twitter.com/tweddit_bot/status/" + tweet_url
 	retval += "\n\n*I am a bot that tries to bridge the gap between Twitter and Reddit. If you reference me or Twitter and a valid Twitter handle in your post, I tweet the post to the twitter handle in question.*"
 	return retval
 
@@ -50,38 +50,63 @@ def reddit_stream(twitter_api, reddit):
 
 				print comment.body
 
+				
 				try :
 					user = twitter_api.get_user(twitter_handle[0])
+					if user.id is twitter_api.me().id:
 
-					tweet = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
+						tweet = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
 
-					#Tweets out reddit link, returns object of that status
-					status_object = twitter_api.update_status(tweet)
-					tweet_id = status_object.id
-
-
-
-					reply_text = reddit_reply(twitter_handle[0], str(tweet_id))
-					comment.reply(reply_text)
-
-					with open("test.txt", "a+") as file:
-						file.write(tweet + "\n")
-						file.write(reply + "\n\n")
+						#Tweets out reddit link, returns object of that status
+						status_object = twitter_api.update_status(tweet)
+						tweet_id = status_object.id
 
 
-						
+
+						reply_text = reddit_reply(twitter_handle[0], str(tweet_id))
+						comment.reply(reply_text)
+
+						with open("test.txt", "a+") as file:
+							file.write(tweet + "\n")
+							file.write(reply + "\n\n")
+
+
+				except praw.exceptions.APIException:
+					twitter_api.destroy_status(tweet_id)
+					print("Rate limit exceeded.\n")
+
+
 				except:
 					print("User not found.\n")
 
 
 				already_done.add(comment.id)
+				check_for_delete_instructions(reddit, twitter_api)
+
+
 
 
 	#post any responses to twitter comments
 
 
 
+def check_for_delete_instructions(reddit, twitter_api):
+	for response in reddit.inbox.unread(mark_read=True):
+		if response.parent().parent().refresh().author.name == response.author.name:
+			if "delete" in response.body:
+				tweddit_post = reply.parent().refresh()
+				print("delete: " + response.body + "\n")
+				print("parent: " + response.parent().refresh().body + "\n")
 
+				if "https://twitter.com/tweddit_bot/status/" in tweddit_post.body:
+					index = tweddit_post.body.rfind("/")
+					print("index: " + index + "\n")
+					twitter_id = int(tweddit_post.body[index:])
+					print("index: " + twitter_id + "\n")
+
+					twitter_api.destroy_status(twitter_id)
+
+					response.reply("Sorry for any inconvienience. I have deleted the tweet. \n\n *I am a bot*")
 
 
 
@@ -105,5 +130,6 @@ twitter_api = tweepy.API(tweepy_auth)
 
 #This sets up the reddit api
 reddit = praw.Reddit('tweddit')
+
 
 reddit_stream(twitter_api, reddit)
