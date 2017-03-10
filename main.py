@@ -53,22 +53,21 @@ def reddit_stream(twitter_api, reddit):
 				
 				try :
 					user = twitter_api.get_user(twitter_handle[0])
-					if user.id is twitter_api.me().id:
 
-						tweet = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
+					tweet = twitter_reply(twitter_handle[0], "reddit.com" + str(comment.permalink()), comment.body)
 
-						#Tweets out reddit link, returns object of that status
-						status_object = twitter_api.update_status(tweet)
-						tweet_id = status_object.id
-
+					#Tweets out reddit link, returns object of that status
+					status_object = twitter_api.update_status(tweet)
+					tweet_id = status_object.id
 
 
-						reply_text = reddit_reply(twitter_handle[0], str(tweet_id))
-						comment.reply(reply_text)
 
-						with open("test.txt", "a+") as file:
-							file.write(tweet + "\n")
-							file.write(reply + "\n\n")
+					reply_text = reddit_reply(twitter_handle[0], str(tweet_id))
+					comment.reply(reply_text)
+
+					with open("test.txt", "a+") as file:
+						file.write(tweet + "\n")
+						file.write(reply + "\n\n")
 
 
 				except praw.exceptions.APIException:
