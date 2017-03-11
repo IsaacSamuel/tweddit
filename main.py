@@ -85,27 +85,26 @@ def reddit_stream(twitter_api, reddit):
 
 
 
-	#post any responses to twitter comments
-
-
-
 def check_for_delete_instructions(reddit, twitter_api):
 	for response in reddit.inbox.unread(mark_read=True):
-		if response.parent().parent().refresh().author.name == response.author.name:
-			if "delete" in response.body:
-				tweddit_post = reply.parent().refresh()
-				print("delete: " + response.body + "\n")
-				print("parent: " + response.parent().refresh().body + "\n")
+		try:
+			if response.parent().refresh().parent().refresh().author.name == response.author.name:
+				if "delete" in response.body:
+					tweddit_post = reply.parent().refresh()
+					print("delete: " + response.body + "\n")
+					print("parent: " + response.parent().refresh().body + "\n")
 
-				if "https://twitter.com/tweddit_bot/status/" in tweddit_post.body:
-					index = tweddit_post.body.rfind("/")
-					print("index: " + index + "\n")
-					twitter_id = int(tweddit_post.body[index:])
-					print("index: " + twitter_id + "\n")
+					if "https://twitter.com/tweddit_bot/status/" in tweddit_post.body:
+						index = tweddit_post.body.rfind("/")
+						print("index: " + index + "\n")
+						twitter_id = int(tweddit_post.body[index:])
+						print("index: " + twitter_id + "\n")
 
-					twitter_api.destroy_status(twitter_id)
+						twitter_api.destroy_status(twitter_id)
 
-					response.reply("Sorry for any inconvienience. I have deleted the tweet. \n\n *I am a bot*")
+						response.reply("Sorry for any inconvienience. I have deleted the tweet. \n\n *I am a bot*")
+		except Exception as e:
+			print(e)
 
 
 
